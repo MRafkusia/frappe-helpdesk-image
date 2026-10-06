@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --innodb-file-per-block=1
+      - --innodb-file-per-table=1
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: always
+    volumes:
+      - redis-cache-data:/data
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: always
+    volumes:
+      - redis-queue-data:/data
+
+  backend:
+    image: frappe/frappe:v15.0.0 # Change version/image as needed (e.g., frappe/erpnext)
+    restart: always
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  frontend:
+    image: frappe/frappe:v15.0.0
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+volumes:
+  db-data:
+  redis-cache-data:
+  redis-queue-data:
+  sites:
